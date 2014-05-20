@@ -12,6 +12,7 @@
 #5) Quit button
 #6) About button
 #7) Data persistence (so far limited, but structure is set and more should come)
+#8) User information updater receives input and stores it as usrClass
 
 #Changes from last version:#
 #Imported Tkinter like a real boy

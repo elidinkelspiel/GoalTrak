@@ -1,6 +1,6 @@
 #####GoalTrak version v. 0.0.5 (alpha version 5)#####
 
-###April 12th, 2014###
+###May 19th, 2014###
 
 #By Eli Dinkelspiel#
 
@@ -9,19 +9,39 @@
 #2) Recognizes if name is already in list
 #3) Refreshes listbox upon alterations to Student List
 #4) Remove names from list
-#5) Quit button
-#6) About button
-#7) Data persistence (so far limited, but structure is set and more should come)
+#5) User information Updater stores usrClass and can set one goal
+    #WHICH MEANS IT CAN SET GOALS!
+#6) Quit button
+#7) About button
+#8) Data persistence
+#9) Notebook functionality
+    #Displays user information
+#10) Can refresh user information manually (it's not a bug it's a feature)
+#11) Stability
+#12) Everything on GitHub
 
 #Changes from last version:#
 #Improved file loading: if location doesn't exist, prints the relevant error message (which is rather long, yet helpful) and loads the program rather than crashing the entire program. May still have bugs.
+#Added notebook functionality
+#Added goal setting (limited to one goal for now, more easily added)
+#Added student info display window for quick inspection
+#Fixed various bugs
+#Needed to add a button to manually refresh information. If I have time, I will try to automate it.
+#Improved various things
+#Took out some unnecessary StringVar()'s and replaced them with static text
+#Much more stable
+#Doesn't print out as much error messages
+#When void of a value, usrClass is now set to None, rather than "Enter user class here"
+#A bunch of other things I probably forgot
 #More documentation
+#GitHub
 
 
 #Known Bugs#
 #Making new user attributes is now broken. HELP!
     #FIXED
 #WORKING ON IMPLEMENTING A WINDOW IN A CANVAS WIDGET TO DISPLAY TEXT
+    #done, but changed to frame widget
 
 
 #Goals for this version#
@@ -30,15 +50,16 @@
     #Should have student info display and goal setting
 #Documentation
 
+#Goals for next version#
+#Track goal values over time
+#Store notes for each student
+#BONUS: Sort users by class
+
 
 from Tkinter import *
 import pickle
 import tkMessageBox
 from ttk import Notebook, PanedWindow
-'''from os from path import exists
-from os import makedirs
-newpath = r'C:\Program Files\arbitrary' 
-if not os.path.exists(newpath): os.makedirs(newpath)'''
 #from time import strftime
 
 def item_from_list_deleter(item, list):
@@ -83,15 +104,15 @@ def file_loader(location):
         you may be intimidated by this window, which looks like the bowels of the computer. Don't worry, go ahead and quit the terminal. It won't do anything. Bye!"""
 
 class User(object):
-    def __init__(self, name, usrClass): #, grades, goals, goalHist, notes):
+    def __init__(self, name, usrClass, goals): #, grades, goalHist, notes):
         self.name = name
         self.usrClass = usrClass
         #self.notes = notes
         #self.grades = grades
-        #self.goals = goals
+        self.goals = goals
         #self.goalHist = goalHist
     
-Albert_Einstein = User('Albert Einstein', 'Physics') #Test student
+
 
 #Loading Section#
 
@@ -108,7 +129,7 @@ for student in student_list:
             student_information[student] = pickle.load(mydoc) 
         mydoc.close()
     except (IOError):
-        student_information[student] = User(student, 'Enter student\'s class here')
+        student_information[student] = User(student, None, {})
     
 ###The Big Cheese###
 
@@ -121,7 +142,7 @@ class GoalTrak(Tk):
     def initialize(self):
         self.grid()
         
-        self.entryVariable = StringVar() #Entry Box
+        self.entryVariable = StringVar() #Student entry box
         self.entry = Entry(self,textvariable=self.entryVariable)
         self.entry.grid(column=0,row=1,sticky='EW')
         self.entry.bind("<Return>", self.onPressEnter)
@@ -158,20 +179,28 @@ class GoalTrak(Tk):
         self.tab = Notebook(width=200, height=200) #Notebook
         self.tab.pressed_index = None
         
-        self.studentClassLabelVar = StringVar()
-        self.studentClassLabelVar.set('')
-        self.studentNameLabelVar = StringVar()
+        ###Notebook\###
+        
+        self.studentInfoDisplayFrame = Frame(self.tab) ####Info display tab###
+        
+        self.studentNameLabelVar = StringVar() #Student name label
         self.studentNameLabelVar.set('Click "show information"')
-        self.studentInfoDisplayFrame = Frame(self.tab)
         studentNameLabel = Label(self.studentInfoDisplayFrame, textvariable=self.studentNameLabelVar, fg='black', bg='white')
-        studentNameLabel.grid(column=0,row=0,sticky='N')
+        studentNameLabel.grid(column=0,row=0,sticky='NW')
+        
+        self.studentClassLabelVar = StringVar() #Student class label
+        self.studentClassLabelVar.set('')
         studentClassLabel = Label(self.studentInfoDisplayFrame, textvariable=self.studentClassLabelVar, fg='black', bg='white')
         studentClassLabel.grid(column=0,row=1,sticky='W')
-        otherWidget = Canvas(self.tab, width=300, height=300)
         
-        #studentNameDisplayWindow = self.studentInfoDisplayCanvas.create_window(100,10,window=studentNameLabel)
-        #studentClassDisplayWindow = self.studentInfoDisplayCanvas.create_window(100,100,window=studentClassLabel)
-        self.tab.add(self.studentInfoDisplayFrame, text='Student Info')
+        self.studentGoal1LabelVar = StringVar() #Student goal1 label
+        self.studentGoal1LabelVar.set('')
+        studentGoal1Label = Label(self.studentInfoDisplayFrame, textvariable=self.studentGoal1LabelVar, fg='black', bg='white')
+        studentGoal1Label.grid(column=0,row=2,sticky='W')
+        
+        otherWidget = Canvas(self.tab, width=300, height=300) #Empty widget for fun!
+        
+        self.tab.add(self.studentInfoDisplayFrame, text='Student Info') #Labels tabs
         self.tab.add(otherWidget, text='Other Widget')
         self.tab.grid(column = 0, row = 7, rowspan = 5, sticky = 'EW')
 
@@ -184,21 +213,20 @@ class GoalTrak(Tk):
         self.entry.selection_range(0, END)
         
         
-    def onAboutClick(self):
+    def onAboutClick(self): #About message
         tkMessageBox.showinfo(title=u'About', message=u'GoalTrak v. Alpha V by Eli Dinkelspiel')
     
         
     def student_list_updater(self, studentlist):
         self.StudentListDisplay.delete(0, END)
         for student in studentlist:
-            self.StudentListDisplay.insert(END, student)
+            self.StudentListDisplay.insert(END, student)#Refreshes student listbox
     
     def onQuitClick(self):
         result = tkMessageBox.askokcancel(title='GoalTrak', message='Are you sure you want to quit GoalTrak?')
         if result == True:
-            GoalTrak.destroy(self)
-            
-        
+            GoalTrak.destroy(self) #Quit button
+               
     def onRemoveClick(self):
         index = self.StudentListDisplay.curselection()
         index = int(index[0])
@@ -208,9 +236,8 @@ class GoalTrak(Tk):
         if result == True:
             del student_list[index]
             self.student_list_updater(student_list)
-            file_saver(student_list, 'GoalTrak/StudentList')
-                
-        
+            file_saver(student_list, 'GoalTrak/StudentList')#Remove student button
+                     
     def onPressEnter(self, event): #Enters students into save file
         hold = self.entryVariable.get()
         hold = str(hold)
@@ -224,44 +251,52 @@ class GoalTrak(Tk):
                 self.labelVariable.set( self.entryVariable.get() + " is already in list" )
             file.close()
         self.entry.focus_set()
-        self.entry.selection_range(0, END)
+        self.entry.selection_range(0, END)#Add student with <enter>
         
-    def onShowInformationClick(self):
+    def onShowInformationClick(self): #Refreshes student information display
         studentNameVar = student_list[int(self.StudentListDisplay.curselection()[0])]
         self.studentNameLabelVar.set(studentNameVar)
+        
+        current_student = file_loader('GoalTrak/StudentInformation' + studentNameVar)
+        
+        #Each one of these try/except pairs makes the various User() attributes visible, if they exist. DO NOT BUNDLE AS ONE
         try:
-            current_student = file_loader('GoalTrak/StudentInformation' + studentNameVar)
             self.studentClassLabelVar.set(current_student.usrClass)
         except (AttributeError):
             self.studentClassLabelVar.set(u'No set class')
-        
+            
+        try:
+            self.studentGoal1LabelVar.set(current_student.goals['goal1'])
+        except (AttributeError):
+            self.studentGoal1LabelVar.set(u'Goal 1 not set')
         
 
-
-    def onInfoUpdateClick(self):
+    def onInfoUpdateClick(self): #User Information Updater
         index = self.StudentListDisplay.curselection()
         index = int(index[0])
         student_name = student_list[index]
         
-        def onSaveQuitClick():
-            hold = self.UserInformationUpdater.classEntry.get()
-            hold = str(hold)
+        def onSaveQuitClick(): #Stores the data
+        
+            classHold = str(self.UserInformationUpdater.classEntry.get())
+            goal1Hold = str(self.UserInformationUpdater.goal1Entry.get())
+            
             current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+            
             for student in student_information: #I probably want to get rid of this for loop but I'm afraid to tinker with my code :(
                 if student == student_name:
                     try:
-                        current_student.usrClass = hold
+                        current_student.usrClass = classHold
+                        current_student.goals['goal1'] = goal1Hold
                         file_saver(current_student, 'GoalTrak/StudentInformation' + student_name)
                     except (AttributeError):
                         print 'New file being created'
-                        file_saver(User(student_name, hold), 'GoalTrak/StudentInformation' + student_name)
+                        file_saver(User(student_name, classHold, {'goal1':goal1Hold}), 'GoalTrak/StudentInformation' + student_name)
                         current_student = file_loader('GoalTrak/StudentInformation' + student_name)
             self.UserInformationUpdater.destroy()
-        try:
-            if student_name == 'Albert Einstein':
-                current_student = Albert_Einstein
-            else:
-                current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+
+        try: #Gives new students a file object
+            current_student = file_loader('GoalTrak/StudentInformation' + student_name)
         except (IOError):
             file_saver('GoalTrak/StudentInformation' + student_name) 
                 
@@ -269,24 +304,34 @@ class GoalTrak(Tk):
         self.UserInformationUpdater = Toplevel()
         self.UserInformationUpdater.grid()
         
-        self.UserInformationUpdater.title("Update Information - %s" % (student_name)) #student_list[index]
+        self.UserInformationUpdater.title("Update Information - %s" % (student_name))
         
-        self.UserInformationUpdater.labelVar = StringVar() #Banner
         self.UserInformationUpdater.infolabel = Label(self.UserInformationUpdater, \
-        textvariable=self.UserInformationUpdater.labelVar, anchor="w", fg="white", bg="navy")
+        text = (u"User Information - %s" % (student_name)), anchor="w", fg="white", bg="navy")
         self.UserInformationUpdater.infolabel.grid(column=0,row=0,columnspan=2,sticky='EW')
-        self.UserInformationUpdater.labelVar.set(u"User Information")
         
-        self.UserInformationUpdater.classEntryInit = StringVar() #Entry Box
-        self.UserInformationUpdater.classEntry = Entry(self.UserInformationUpdater, textvariable=self.UserInformationUpdater.classEntryInit)
+        #Visual stuff for the updater
+        
+        self.UserInformationUpdater.classVar = StringVar()
+        self.UserInformationUpdater.classEntry = Entry(self.UserInformationUpdater, textvariable=self.UserInformationUpdater.classVar)
         self.UserInformationUpdater.classEntry.grid(column=0,row=1,sticky='EW')
-        try:
-            self.UserInformationUpdater.classEntryInit.set(str(current_student.usrClass))
-        except (AttributeError):
-            self.UserInformationUpdater.classEntryInit.set(u"Enter student's class here")
-            
         
-        self.UIU_quitButton = Button(self.UserInformationUpdater, text=u"Save and Quit", command=onSaveQuitClick) #You think this section needs a note? Figure it out on your own, hotstuff!
+        try:
+            self.UserInformationUpdater.classVar.set(str(current_student.usrClass))
+        except (AttributeError):
+            self.UserInformationUpdater.classVar.set(u"Enter student's class here")
+        
+        self.UserInformationUpdater.goal1Var = StringVar()
+        self.UserInformationUpdater.goal1Entry = Entry(self.UserInformationUpdater, textvariable=self.UserInformationUpdater.goal1Var)
+        self.UserInformationUpdater.goal1Entry.grid(column=0,row=2,sticky='EW')
+        
+        try:
+            self.UserInformationUpdater.goal1Var.set(str(current_student.goals['goal1']))
+        except (AttributeError):
+            self.UserInformationUpdater.goal1Var.set(u"Enter goal 1 here:")
+        
+        
+        self.UIU_quitButton = Button(self.UserInformationUpdater, text=u"Save and Quit", command=onSaveQuitClick) #Save & Quit button
         self.UIU_quitButton.grid(column=1, row=2)
         
         self.UserInformationUpdater.grid_columnconfigure(0,weight=1) #This makes it so the window is resizable
