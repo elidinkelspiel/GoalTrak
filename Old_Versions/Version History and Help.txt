@@ -1,0 +1,61 @@
+README
+
+Notice - old versions may refer to files that no longer exist. If, for some reason, you wish to run these, please don't worry if nothing is saving correctly.
+
+Version history:
+
+Alpha version 1:
+
+The first version was basically a variant of a tutorial I found online for Tkinter. Most of that structure is gone now, don't worry. The most important part of version 1 was the introduction of input/output. Yes, it would eventually change, but this was the first step into the world of functional programming.
+
+Alpha version 2:
+
+This version is essentially inoperable, as it uses old loading structures. Said loading conventions were greatly improved from the last version, although still primitive. Otherwise, no significant updates.
+
+Alpha version 3 (version 1):
+
+This seems identical to v.0.0.2. Moving on.
+
+Alpha version 3 (version 2):
+
+Thankfully, documentation started in this version so I know what I was doing. Let's begin:
+
+This version's functionality:
+	1) Can add names to a list database of Students
+	2) Recognizes if name is already in list
+	3) Refreshes listbox upon adding new name
+	4) Quit button
+	5) I started documenting cause I'm cool like that. You can thank me later.
+
+Changes from last version:
+	1) Everything cause I just started documenting
+
+Goals for next version:
+	1) Remove names from list
+	2) Display a simple piece of data upon name selection (arbitrary, doesn't have to have any relevance or functionality)
+
+I consider this to be the first "true" version of GoalTrak, despite the fact that even as I write this, more than a month later, GoalTrak still doesn't do even basic "goal tracking." Importantly, however, this is the first version where GoalTrak doesn't require a reload to update data. This is important because I believe that is what separates a collection of functions from true "software." With that said, almost everything in this version happens behind the scenes, so it's thoroughly unimpressive.
+
+Alpha version 4:
+
+This version's functionality: (note: not all inclusive, just big stuff)
+	1) Can add names to a list database of students, which is saved in a text document bundled with the program
+	2) Recognizes if name is already in list
+	3) Refreshes listbox upon alterations to Student List
+	4) Remove names from list
+	5) Quit button
+	6) About button
+	7) Data persistence (so far limited, but structure is set and more should come)
+
+Changes from last version:
+	1) Imported Tkinter like a real boy
+	2) Capability to remove names from list
+	3)Quit button now quits python correctly
+	4)Cool about button that I wrote on the plane 'cause I was bored
+	5)Update information now stores student classes and will load properly (data persistence)
+
+Goals for next version:
+	1)Allow teachers to assign goals
+	2)Improve the data structure
+	3)Transition to notebook functionality
+    		Should have student info display and goal setting
