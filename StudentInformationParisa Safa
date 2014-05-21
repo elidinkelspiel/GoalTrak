@@ -18,4 +18,11 @@ sS'usrClass'
 p8
 S'CompSci'
 p9
-sb.
+sS'goals'
+p10
+(dp11
+S'goal1'
+p12
+S'Enter goal 1 here:'
+p13
+ssb.

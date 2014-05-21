@@ -179,7 +179,7 @@ class GoalTrak(Tk):
         self.tab = Notebook(width=200, height=200) #Notebook
         self.tab.pressed_index = None
         
-        ###Notebook\###
+        ###Notebook###
         
         self.studentInfoDisplayFrame = Frame(self.tab) ####Info display tab###
         
