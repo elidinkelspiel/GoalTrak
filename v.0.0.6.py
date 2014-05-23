@@ -47,6 +47,7 @@
 from Tkinter import *
 import pickle
 import tkMessageBox
+from os import remove
 from ttk import Notebook, PanedWindow
 from datetime import datetime
 #from time import strftime
@@ -92,12 +93,7 @@ def file_loader(location):
         call me at 415-407-3601. If you're at Urban, Parisa or Bethany will probably be able to help you out. And if you're really computer illiterate, \
         you may be intimidated by this window, which looks like the bowels of the computer. Don't worry, go ahead and quit the terminal. It won't do anything. Bye!"""
 
-class dataPoint(object):
-    def __init__(self, goal, goalVal, note):
-        self.goal = goal
-        self.goalVal = goalVal
-        self.note = note
-    def compile(goal, goalVal, note):
+def dataPointCompile(goal, goalVal, note):
         return {'timestamp':datetime.now(),
         'goal':goal, 
         'goalVal':goalVal,
@@ -105,14 +101,16 @@ class dataPoint(object):
         }
         
 class User(object):
-    def __init__(self, name, usrClass, goals, dataPoint): #grades
+    def __init__(self, name, usrClass, goals, dataHist): #grades
         self.name = name
         self.usrClass = usrClass
         #self.grades = grades
         self.goals = goals
-        self.dataPoint = dataPoint
+        self.dataHist = dataHist
     
 current_student = None
+
+
 
 #Loading Section#
 
@@ -128,7 +126,7 @@ for student in student_list:
             student_information[student] = pickle.load(mydoc) 
         mydoc.close()
     except (IOError):
-        student_information[student] = User(student, None, {}, None)
+        student_information[student] = User(student, None, {}, [])
     
 ###The Big Cheese###
 
@@ -201,18 +199,17 @@ class GoalTrak(Tk):
         self.dataGenerationFrame = Frame(self.tab) ###Data entry frame###
         self.dataGenerationFrame.grid()
         
-        self.listboxFrame = Frame(self.dataGenerationFrame) #LISTBOX
-        self.listboxFrame.grid(column=0, row=0, columnspan=2, rowspan=2, padx=2, pady=2)
-        self.goalSelection = Listbox(self.listboxFrame)
-        self.goalSelection.pack()
-        
-        
-        #goalSelection.grid(column=0, row=0, columnspan = 2, sticky = 'NW', padx = 5, pady = 5)
+        self.optionMenuFrame = Frame(self.dataGenerationFrame) #OPTIONMENU
+        self.optionMenuFrame.grid(column=0, row=0, columnspan=2, padx=2, pady=2)
+        self.omInitVal = StringVar()
+        self.omInitVal.set(u'Unattached Note')
+        self.optionMenu = OptionMenu(self.optionMenuFrame, var, "goal 1", "goal 2", "goal 3", "Unattached Note")
+        self.optionMenu.pack()
         
         self.goalValEntryFrame = Frame(self.dataGenerationFrame) #SPINBOX
         self.goalValEntryFrame.grid(row= 0, column=4, padx=2, pady=2)
-        goalValEntry = Spinbox(self.goalValEntryFrame, from_=0, to=10)
-        goalValEntry.pack()
+        self.goalValEntry = Spinbox(self.goalValEntryFrame, from_=0, to=10)
+        self.goalValEntry.pack()
         
         self.noteEntryFrame = Frame(self.dataGenerationFrame) #TEXT
         self.noteEntryFrame.grid(column= 2, row=1, columnspan=3, rowspan=3, padx=2, pady=2)
@@ -259,9 +256,14 @@ class GoalTrak(Tk):
         message='Are you sure you want to remove %s? This cannot be undone and will remove all associated data.' \
         % (student_list[index]))
         if result == True:
+            try:
+                remove('GoalTrak/StudentInformation' +student_list[index])
+            except (OSError):
+                pass
             del student_list[index]
             self.student_list_updater(student_list)
             file_saver(student_list, 'GoalTrak/StudentList')#Remove student button
+            
                      
     def onPressEnter(self, event): #Enters students into save file
         hold = self.entryVariable.get()
@@ -279,20 +281,33 @@ class GoalTrak(Tk):
         self.entry.selection_range(0, END)#Add student with <enter>
     
     def onStoreInformationClick(self):
-        note_hold = self.noteEntryFrame.noteEntry.get(1.0, END)
+        note_hold = self.noteEntry.get(1.0, END)
+        val_hold = self.goalValEntry.get()
+        validEntry = True
         try:
-            entry_mode = current_student.goals['goal' + self.goalSelection.curselection()[0]]
-            print goalValEntry.get()
+            entry_goal = current_student.goals['goal' + self.goalSelection.curselection()[0]]
         except(KeyError):
-            entry_mode = 'notes'
-        if entry_mode in ['goal1', 'goal2', 'goal3']:
-            entr
+            entry_mode = 4
+        if entry_mode in [1, 2, 3]:
+            if self.goalSelection.get() in ['<goal1 not set>', '<goal2 not set>', '<goal3 not set>']:
+                tkMessageBox.showerror('Goal not defined')
+                validEntry = False
+            else:
+                if note_hold == '':
+                    note_hold = None
+        elif entry_mode == 4:
+            val_hold = None
+            entry_goal = None
+        if validEntry:
+            current_student.dataHist.append(dataPointCompile(entry_goal, val_hold, note_hold))
+            file_saver(current_student, 'GoalTrak/StudentInformation' + current_student.name)
             
         
     def onShowInformationClick(self): #Refreshes student information display
         studentNameVar = student_list[int(self.StudentListDisplay.curselection()[0])]
         self.studentNameLabelVar.set(studentNameVar)
         
+        global current_student
         current_student = file_loader('GoalTrak/StudentInformation' + studentNameVar)
         
         ####Each one of these try/except pairs makes the various User() attributes visible, if they exist. DO NOT BUNDLE AS ONE###
@@ -306,51 +321,45 @@ class GoalTrak(Tk):
             self.studentGoal1LabelVar.set(current_student.goals['goal1'])
         except (AttributeError):
             self.studentGoal1LabelVar.set(u'Goal 1 not set')
-        #dataGenFrame
-        self.goalSelection.delete(0, END)
-        try:
-            self.goalSelection.insert(END, current_student.goals['goal1'])
-        except (AttributeError):
-            pass
-        try:
-            self.goalSelection.insert(END, current_student.goals['goal2'])
-        except (AttributeError, KeyError):
-            pass
-        try:
-            self.goalSelection.insert(END, current_student.goals['goal3'])
-        except (AttributeError, KeyError):
-            pass
-        self.goalSelection.insert(END, 'Unattached Note')
-        
+        #dataGenFrame To COME
+       
 
     def onInfoUpdateClick(self): #User Information Updater
         index = self.StudentListDisplay.curselection()
         index = int(index[0])
         student_name = student_list[index]
         
+        try: #Gives new students a file object
+            global current_student
+            current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+        except (IOError):
+            file_saver('GoalTrak/StudentInformation' + student_name)
+            global current_student
+            current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+        
         def onSaveQuitClick(): #Stores the data
         
             classHold = str(self.UserInformationUpdater.classEntry.get())
             goal1Hold = str(self.UserInformationUpdater.goal1Entry.get())
             
+            global current_student
             current_student = file_loader('GoalTrak/StudentInformation' + student_name)
             
             for student in student_information: #I probably want to get rid of this for loop but I'm afraid to tinker with my code :(
                 if student == student_name:
                     try:
+                        global current_student
                         current_student.usrClass = classHold
                         current_student.goals['goal1'] = goal1Hold
                         file_saver(current_student, 'GoalTrak/StudentInformation' + student_name)
                     except (AttributeError):
                         print 'New file being created'
-                        file_saver(User(student_name, classHold, {'goal1':goal1Hold}, None), 'GoalTrak/StudentInformation' + student_name)
+                        file_saver(User(student_name, classHold, {'goal1':goal1Hold}, []), 'GoalTrak/StudentInformation' + student_name, )
+                        global current_student
                         current_student = file_loader('GoalTrak/StudentInformation' + student_name)
             self.UserInformationUpdater.destroy()
 
-        try: #Gives new students a file object
-            current_student = file_loader('GoalTrak/StudentInformation' + student_name)
-        except (IOError):
-            file_saver('GoalTrak/StudentInformation' + student_name) 
+        
                 
         
         self.UserInformationUpdater = Toplevel()
@@ -391,7 +400,23 @@ class GoalTrak(Tk):
         self.UserInformationUpdater.update()
         self.UserInformationUpdater.geometry(self.UserInformationUpdater.geometry())
         
-
+    def goalSelDispSet(self):
+        result = []
+        global current_student
+        try:
+            result.append((current_student.goals['goal1'], '1'))
+        except (KeyError, AttributeError):
+            pass
+        try:
+            result.append((current_student.goals['goal2'], '2'))
+        except (KeyError, AttributeError):
+            pass
+        try:
+            result.append((current_student.goals['goal3'], '3'))
+        except (KeyError, AttributeError):
+            pass
+        result.append(('Unattached Note', '4'))
+        return result
         
         
 if __name__ == "__main__": #Looper: Starring app.mainloop

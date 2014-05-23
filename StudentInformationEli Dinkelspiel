@@ -10,19 +10,52 @@ p2
 Ntp3
 Rp4
 (dp5
-S'name'
+S'dataHist'
 p6
-S'Eli Dinkelspiel'
-p7
-sS'usrClass'
-p8
-S'CompSci'
+(lp7
+(dp8
+S'note'
 p9
-sS'goals'
+VGoalTrak was turned in on-time\u000a
 p10
-(dp11
-S'goal1'
+sS'timestamp'
+p11
+cdatetime
+datetime
 p12
-S'Finish projects in a timely manner'
+(S'\x07\xde\x05\x17\n\x16 \x00\xe5\xf5'
 p13
+tp14
+Rp15
+sS'goal'
+p16
+NsS'goalVal'
+p17
+Nsa(dp18
+g9
+VGoalTrak was turned in on-time\u000a
+p19
+sg11
+g12
+(S'\x07\xde\x05\x17\n\x18#\x07\x1c\xe2'
+p20
+tp21
+Rp22
+sg16
+Nsg17
+NsasS'name'
+p23
+S'Eli Dinkelspiel'
+p24
+sS'usrClass'
+p25
+S'CompSci'
+p26
+sS'goals'
+p27
+(dp28
+S'goal1'
+p29
+S'Turn things in on time'
+p30
 ssb.

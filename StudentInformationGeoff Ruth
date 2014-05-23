@@ -10,19 +10,22 @@ p2
 Ntp3
 Rp4
 (dp5
-S'name'
+S'dataHist'
 p6
-S'Geoff Ruth'
-p7
-sS'usrClass'
+(lp7
+sS'name'
 p8
-S'Chemistry'
+S'Geoff Ruth'
 p9
-sS'goals'
+sS'usrClass'
 p10
-(dp11
-S'goal1'
+S'Chemistry'
+p11
+sS'goals'
 p12
-S'Not hurt any students'
-p13
+(dp13
+S'goal1'
+p14
+S"Don't hurt any students"
+p15
 ssb.

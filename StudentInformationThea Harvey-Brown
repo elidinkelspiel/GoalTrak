@@ -10,21 +10,19 @@ p2
 Ntp3
 Rp4
 (dp5
-S'dataPoint'
+S'name'
 p6
-NsS'name'
+S'Thea Harvey-Brown'
 p7
-S'Sam Lim Kimberg'
-p8
 sS'usrClass'
+p8
+S'Math'
 p9
-S'Biology'
-p10
 sS'goals'
-p11
-(dp12
+p10
+(dp11
 S'goal1'
+p12
+S'Learn how to add'
 p13
-S'Learn somthing cool'
-p14
 ssb.
