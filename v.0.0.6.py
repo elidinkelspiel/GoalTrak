@@ -112,7 +112,7 @@ class User(object):
         self.goals = goals
         self.dataPoint = dataPoint
     
-
+current_student = None
 
 #Loading Section#
 
@@ -175,8 +175,9 @@ class GoalTrak(Tk):
         for student in student_list:
             self.StudentListDisplay.insert(END, student)
         
-        self.tab = Notebook(width=200, height=200) #Notebook
+        self.tab = Notebook(width = 500, height = 300) #Notebook
         self.tab.pressed_index = None
+        
         
         ###Notebook###
         
@@ -197,16 +198,36 @@ class GoalTrak(Tk):
         studentGoal1Label = Label(self.studentInfoDisplayFrame, textvariable=self.studentGoal1LabelVar, fg='black', bg='white')
         studentGoal1Label.grid(column=0,row=2,sticky='W')
         
-        self.dataGenerationFrame = Frame(self.tab) #Empty widget for fun!
-        noteEntry = Text(self.dataGenerationFrame, borderwidth=2, relief=SUNKEN)
-        noteEntry.grid(column=0, row=2, columnspan = 1, rowspan = 1, sticky = 'W')
-        goalValEntry = Spinbox(self.dataGenerationFrame, from_=0, to=10)
-        goalValEntry.grid(column=0, row=0, sticky ='W')
+        self.dataGenerationFrame = Frame(self.tab) ###Data entry frame###
+        self.dataGenerationFrame.grid()
         
+        self.listboxFrame = Frame(self.dataGenerationFrame) #LISTBOX
+        self.listboxFrame.grid(column=0, row=0, columnspan=2, rowspan=2, padx=2, pady=2)
+        self.goalSelection = Listbox(self.listboxFrame)
+        self.goalSelection.pack()
+        
+        
+        #goalSelection.grid(column=0, row=0, columnspan = 2, sticky = 'NW', padx = 5, pady = 5)
+        
+        self.goalValEntryFrame = Frame(self.dataGenerationFrame) #SPINBOX
+        self.goalValEntryFrame.grid(row= 0, column=4, padx=2, pady=2)
+        goalValEntry = Spinbox(self.goalValEntryFrame, from_=0, to=10)
+        goalValEntry.pack()
+        
+        self.noteEntryFrame = Frame(self.dataGenerationFrame) #TEXT
+        self.noteEntryFrame.grid(column= 2, row=1, columnspan=3, rowspan=3, padx=2, pady=2)
+        self.noteEntry = Text(self.noteEntryFrame, borderwidth=2, height = 15, width = 40, relief=SUNKEN)
+        self.noteEntry.pack(anchor= 'w')
+        
+        self.buttonBox = Frame(self.dataGenerationFrame)
+        self.buttonBox.grid(row= 4, column= 0, columnspan= 2, rowspan= 2, sticky= 'W')
+        self.addDataButton = Button(self.buttonBox, text = 'Store Information', command=self.onStoreInformationClick)
+        self.addDataButton.pack()
         
         self.tab.add(self.studentInfoDisplayFrame, text='Student Info') #Labels tabs
         self.tab.add(self.dataGenerationFrame, text='Enter Data')
         self.tab.grid(column = 0, row = 7, rowspan = 5, sticky = 'EW')
+        
 
 
         self.grid_columnconfigure(0,weight=1) #This makes it so the window is resizable
@@ -256,6 +277,17 @@ class GoalTrak(Tk):
             file.close()
         self.entry.focus_set()
         self.entry.selection_range(0, END)#Add student with <enter>
+    
+    def onStoreInformationClick(self):
+        note_hold = self.noteEntryFrame.noteEntry.get(1.0, END)
+        try:
+            entry_mode = current_student.goals['goal' + self.goalSelection.curselection()[0]]
+            print goalValEntry.get()
+        except(KeyError):
+            entry_mode = 'notes'
+        if entry_mode in ['goal1', 'goal2', 'goal3']:
+            entr
+            
         
     def onShowInformationClick(self): #Refreshes student information display
         studentNameVar = student_list[int(self.StudentListDisplay.curselection()[0])]
@@ -263,16 +295,32 @@ class GoalTrak(Tk):
         
         current_student = file_loader('GoalTrak/StudentInformation' + studentNameVar)
         
-        #Each one of these try/except pairs makes the various User() attributes visible, if they exist. DO NOT BUNDLE AS ONE
+        ####Each one of these try/except pairs makes the various User() attributes visible, if they exist. DO NOT BUNDLE AS ONE###
+        
+        #infoFrame
         try:
             self.studentClassLabelVar.set(current_student.usrClass)
         except (AttributeError):
             self.studentClassLabelVar.set(u'No set class')
-            
         try:
             self.studentGoal1LabelVar.set(current_student.goals['goal1'])
         except (AttributeError):
             self.studentGoal1LabelVar.set(u'Goal 1 not set')
+        #dataGenFrame
+        self.goalSelection.delete(0, END)
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal1'])
+        except (AttributeError):
+            pass
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal2'])
+        except (AttributeError, KeyError):
+            pass
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal3'])
+        except (AttributeError, KeyError):
+            pass
+        self.goalSelection.insert(END, 'Unattached Note')
         
 
     def onInfoUpdateClick(self): #User Information Updater
