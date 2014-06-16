@@ -26,13 +26,11 @@
 #dataPoint is inherited. It's its own class.
 #dataPoint has a function, compile()
 #creates a dictionary with all possible data types. If data type isn't included passed NoneType. 
+#Added functionality to my new text field and spinbox!
 
 
 
 #Known Bugs/TODO#
-#Having trouble with my textfield gridding. It doesn't seem to want to conform to the columnspan/rowspan commands I give it
-#Add functionality to my new text field and spinbox!
-
 
 
 #Goals for this version#
@@ -85,7 +83,7 @@ def file_loader(location):
         return result
     except (IOError):
         print "No such file or directory: " + "\"" + location + "\""
-        
+        raise(IOError)
         """If you're seeing this error and your name is not Eli Dinkelspiel, \
         please contact Eli to sort out your loading issues. Most likely, you moved or altered relevant storage data. \
         Actually, that's exactly what you did, but I wanted to sugarcoat it. Sorry, mate. If this program is somehow in use in an actual classroom context, \
@@ -199,12 +197,10 @@ class GoalTrak(Tk):
         self.dataGenerationFrame = Frame(self.tab) ###Data entry frame###
         self.dataGenerationFrame.grid()
         
-        self.optionMenuFrame = Frame(self.dataGenerationFrame) #OPTIONMENU
-        self.optionMenuFrame.grid(column=0, row=0, columnspan=2, padx=2, pady=2)
-        self.omInitVal = StringVar()
-        self.omInitVal.set(u'Unattached Note')
-        self.optionMenu = OptionMenu(self.optionMenuFrame, var, "goal 1", "goal 2", "goal 3", "Unattached Note")
-        self.optionMenu.pack()
+        self.listboxFrame = Frame(self.dataGenerationFrame) #LISTBOX
+        self.listboxFrame.grid(column=0, row=0, columnspan=2, rowspan=2, padx=2, pady=2)
+        self.goalSelection = Listbox(self.listboxFrame)
+        self.goalSelection.pack()
         
         self.goalValEntryFrame = Frame(self.dataGenerationFrame) #SPINBOX
         self.goalValEntryFrame.grid(row= 0, column=4, padx=2, pady=2)
@@ -224,8 +220,6 @@ class GoalTrak(Tk):
         self.tab.add(self.studentInfoDisplayFrame, text='Student Info') #Labels tabs
         self.tab.add(self.dataGenerationFrame, text='Enter Data')
         self.tab.grid(column = 0, row = 7, rowspan = 5, sticky = 'EW')
-        
-
 
         self.grid_columnconfigure(0,weight=1) #This makes it so the window is resizable
         self.resizable(True,True)
@@ -285,22 +279,24 @@ class GoalTrak(Tk):
         val_hold = self.goalValEntry.get()
         validEntry = True
         try:
-            entry_goal = current_student.goals['goal' + self.goalSelection.curselection()[0]]
+            entry_mode = current_student.goals['goal' + self.goalSelection.curselection()[0]]
         except(KeyError):
-            entry_mode = 4
-        if entry_mode in [1, 2, 3]:
+            entry_mode = 3
+        if entry_mode in ['goal1', 'goal2', 'goal3']:
             if self.goalSelection.get() in ['<goal1 not set>', '<goal2 not set>', '<goal3 not set>']:
                 tkMessageBox.showerror('Goal not defined')
                 validEntry = False
             else:
                 if note_hold == '':
                     note_hold = None
-        elif entry_mode == 4:
+        elif entry_mode == 3:
             val_hold = None
-            entry_goal = None
+            entry_mode = None
         if validEntry:
-            current_student.dataHist.append(dataPointCompile(entry_goal, val_hold, note_hold))
+            current_student.dataHist.append(dataPointCompile(entry_mode, val_hold, note_hold))
             file_saver(current_student, 'GoalTrak/StudentInformation' + current_student.name)
+            self.labelVariable.set(u"Data safely stored")
+            
             
         
     def onShowInformationClick(self): #Refreshes student information display
@@ -321,7 +317,22 @@ class GoalTrak(Tk):
             self.studentGoal1LabelVar.set(current_student.goals['goal1'])
         except (AttributeError):
             self.studentGoal1LabelVar.set(u'Goal 1 not set')
-        #dataGenFrame To COME
+        #dataGenFrame
+        self.goalSelection.delete(0, END)
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal1'])
+        except (AttributeError):
+            pass
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal2'])
+        except (AttributeError, KeyError):
+            pass
+        try:
+            self.goalSelection.insert(END, current_student.goals['goal3'])
+        except (AttributeError, KeyError):
+            pass
+        self.goalSelection.insert(END, 'Unattached Note')
+
        
 
     def onInfoUpdateClick(self): #User Information Updater
@@ -333,7 +344,7 @@ class GoalTrak(Tk):
             global current_student
             current_student = file_loader('GoalTrak/StudentInformation' + student_name)
         except (IOError):
-            file_saver('GoalTrak/StudentInformation' + student_name)
+            file_saver(User(student_name, None, None, None), 'GoalTrak/StudentInformation' + student_name)
             global current_student
             current_student = file_loader('GoalTrak/StudentInformation' + student_name)
         
@@ -343,7 +354,11 @@ class GoalTrak(Tk):
             goal1Hold = str(self.UserInformationUpdater.goal1Entry.get())
             
             global current_student
-            current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+            try:
+                current_student = file_loader('GoalTrak/StudentInformation' + student_name)
+            except (IOError):
+                print "New file being created for " + student_name
+                current_student = User(student_name, None, None, None)
             
             for student in student_information: #I probably want to get rid of this for loop but I'm afraid to tinker with my code :(
                 if student == student_name:
@@ -378,8 +393,11 @@ class GoalTrak(Tk):
         self.UserInformationUpdater.classEntry.grid(column=0,row=1,sticky='EW')
         
         try:
-            self.UserInformationUpdater.classVar.set(str(current_student.usrClass))
-        except (AttributeError):
+            if current_student.usrClass != None:
+                self.UserInformationUpdater.classVar.set(str(current_student.usrClass))
+            else:
+                self.UserInformationUpdater.classVar.set(u"Enter student's class here")
+        except (AttributeError, TypeError):
             self.UserInformationUpdater.classVar.set(u"Enter student's class here")
         
         self.UserInformationUpdater.goal1Var = StringVar()
@@ -388,8 +406,8 @@ class GoalTrak(Tk):
         
         try:
             self.UserInformationUpdater.goal1Var.set(str(current_student.goals['goal1']))
-        except (AttributeError):
-            self.UserInformationUpdater.goal1Var.set(u"Enter goal 1 here:")
+        except (AttributeError, TypeError):
+            self.UserInformationUpdater.goal1Var.set(u"Enter goal 1 here")
         
         
         self.UIU_quitButton = Button(self.UserInformationUpdater, text=u"Save and Quit", command=onSaveQuitClick) #Save & Quit button

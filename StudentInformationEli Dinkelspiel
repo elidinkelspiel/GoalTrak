@@ -43,19 +43,54 @@ tp21
 Rp22
 sg16
 Nsg17
-NsasS'name'
-p23
-S'Eli Dinkelspiel'
+Nsa(dp23
+S'note'
 p24
-sS'usrClass'
+VTurned in his paper on time\u000a
 p25
-S'CompSci'
+sS'timestamp'
 p26
-sS'goals'
+g12
+(S'\x07\xde\x06\x05\r8\x1b\x07\xda{'
 p27
-(dp28
-S'goal1'
-p29
-S'Turn things in on time'
+tp28
+Rp29
+sS'goal'
 p30
+NsS'goalVal'
+p31
+Nsa(dp32
+S'note'
+p33
+VHello world\u000a
+p34
+sS'timestamp'
+p35
+g12
+(S"\x07\xde\x06\x10\x10'$\x06\\'"
+p36
+tp37
+Rp38
+sS'goal'
+p39
+S'Turn things in on time'
+p40
+sS'goalVal'
+p41
+S'0'
+p42
+sasS'name'
+p43
+S'Eli Dinkelspiel'
+p44
+sS'usrClass'
+p45
+S'CompScience'
+p46
+sS'goals'
+p47
+(dp48
+S'goal1'
+p49
+g40
 ssb.

@@ -13,19 +13,37 @@ Rp4
 S'dataHist'
 p6
 (lp7
-sS'name'
-p8
-S'Geoff Ruth'
+(dp8
+S'note'
 p9
-sS'usrClass'
+VGeoff managed to be a good boy today!\u000a
 p10
-S'Chemistry'
+sS'timestamp'
 p11
-sS'goals'
+cdatetime
+datetime
 p12
-(dp13
+(S'\x07\xde\x05\x17\r\'4\x0f"\x94'
+p13
+tp14
+Rp15
+sS'goal'
+p16
+NsS'goalVal'
+p17
+NsasS'name'
+p18
+S'Geoff Ruth'
+p19
+sS'usrClass'
+p20
+S'Chemistry'
+p21
+sS'goals'
+p22
+(dp23
 S'goal1'
-p14
+p24
 S"Don't hurt any students"
-p15
+p25
 ssb.
